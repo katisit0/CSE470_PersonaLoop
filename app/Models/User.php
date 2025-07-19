@@ -45,4 +45,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function personas()
+    {
+        return $this->belongsToMany(Persona::class, 'user_persona')
+                    ->withPivot('xp', 'created_at', 'updated_at')
+                    ->withTimestamps();
+    }
+
 }
