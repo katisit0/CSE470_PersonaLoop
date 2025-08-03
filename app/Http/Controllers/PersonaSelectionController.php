@@ -37,8 +37,14 @@ class PersonaSelectionController extends Controller
             ->exists();
 
         if ($alreadySelected) {
-            return redirect()->back()->with('error', 'You have already selected a persona today.');
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already selected a persona today.',
+            ], 409);
         }
+
+        
+
 
         // Check if user has used this persona before
         $existingEntry = $user->personas()
@@ -55,12 +61,19 @@ class PersonaSelectionController extends Controller
             // Unlock new persona
             $user->personas()->attach($request->persona_id, [
                 'xp' => 10, // Start with base XP
-                'date' => now(),
+                'date' => today(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
 
-        return redirect()->route('dashboard')->with('success', 'Persona selected successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Persona selected successfully!',
+        ]);
+
+
     }
+
+    
 }
