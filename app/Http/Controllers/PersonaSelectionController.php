@@ -55,6 +55,7 @@ class PersonaSelectionController extends Controller
             // Unlock new persona
             $user->personas()->attach($request->persona_id, [
                 'xp' => 10, // Start with base XP
+                'date' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

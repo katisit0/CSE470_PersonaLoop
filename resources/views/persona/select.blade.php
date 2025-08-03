@@ -1,41 +1,38 @@
 @extends('layouts.app')
 
 @section('content')
-
-
-<div class="min-h-screen flex items-center justify-center bg-gray-900 text-white overflow-hidden">
-    <div class="relative w-[400px] h-[400px] hand">
-        @foreach ($personas as $index => $persona)
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 card" style="--i: {{ $index }};">
-                <form action="{{ route('persona.select', $persona->id) }}" method="POST" class="w-full h-full">
-                    @csrf
-                    <button type="submit" class="w-24 h-36 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md hover:scale-105 transition duration-300 flex items-center justify-center text-center font-bold">
-                        {{ $persona->name }}
-                    </button>
-                </form>
-            </div>
-        @endforeach
+<div class="min-h-screen bg-gray-900 text-white py-12 px-6">
+    <h1 class="text-3xl font-bold mb-8 text-center">Choose Your Persona</h1>
+    
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-wrap">
+            @foreach ($personas as $persona)
+                <div class="basis-1/3 max-w-1/3 p-4">
+                    <form action="{{ route('persona.select', $persona->id) }}" method="POST" onsubmit="return confirm('Select {{ $persona->name }}?')">
+                        @csrf
+                        <input type="hidden" name="persona_id" value="{{ $persona->id }}">
+                        <button type="submit" class="w-full bg-[#470000] hover:bg-[#FF0000] rounded-lg shadow-xl p-4 text-left transition duration-300 
+                            border-2
+                            transform hover:-translate-y-1 
+                            ring-2 ring-offset-2 ring-offset-[#470000] ring-[#470000]">
+                            
+                            <div class="h-40 w-full bg-gray rounded mb-4 flex items-center justify-center">
+                                <span class="text-gray-400">
+                                    <img src="{{ asset($persona->image) }}" 
+                                        alt="{{ $persona->name }}" 
+                                        style="width: 120px; height: 120px; object-fit: contain; border-radius: 0.25rem;"
+                                        class="rounded"
+                                    >
+                                </span>
+                            </div>
+                
+                            <h2 class="text-xl font-semibold mb-2 text-white">{{ $persona->name }}</h2>
+                            <p class="text-sm text-white-300">{{ $persona->description }}</p>
+                        </button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
     </div>
 </div>
-@endsection
-
-@section('styles')
-<style>
-    .hand {
-        position: relative;
-        perspective: 1000px;
-        width: 400px;
-        height: 400px;
-    }
-    .card {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform-origin: bottom center;
-        transition: transform 0.4s;
-    }
-    .hand:hover .card {
-        transform: rotate(calc((var(--i) - 2) * 15deg)) translateY(-30px);
-    }
-</style>
 @endsection
