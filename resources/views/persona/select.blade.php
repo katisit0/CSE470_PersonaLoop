@@ -52,10 +52,17 @@
                 persona_id: personaId
             },
             success: function (response) {
-                $('#message')
-                    .text(response.message)
-                    .css('color', response.success ? 'lime' : 'orange');
+                $('#message').html(`
+                    <div class="flex justify-center mb-8">
+                        <div class="relative ${response.success ? 'bg-[#004747]' : 'bg-yellow-600'} p-6 rounded-2xl shadow-lg border border-teal-300">
+                            <h1 class="text-4xl font-extrabold text-white text-center tracking-wide drop-shadow-md">
+                                ${response.message}
+                            </h1>
+                        </div>
+                    </div>
+                `);
             },
+
             error: function (xhr) {
                 const msg = xhr.responseJSON?.message || 'An error occurred. Please try again.';
                 $('#message').text(msg).css('color', 'red');

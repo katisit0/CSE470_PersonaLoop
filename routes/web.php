@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
     //Route::post('/persona/select/{id}', [PersonaSelectionController::class, 'store'])->name('persona.select');
 
     Route::get('/select-persona', [PersonaSelectionController::class, 'index'])->name('persona.select');
+    Route::post('/select-persona', [PersonaSelectionController::class, 'store'])->name('persona.select');
+
 
 
 
