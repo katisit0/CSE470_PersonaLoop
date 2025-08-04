@@ -11,8 +11,8 @@ class Persona extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class)
-            ->withPivot('date', 'is_unlocked')
+        return $this->belongsToMany(User::class, 'user_persona')
+            ->withPivot('xp', 'date', 'is_unlocked')
             ->withTimestamps();
     }
 }

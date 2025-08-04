@@ -49,8 +49,17 @@ class User extends Authenticatable
     public function personas()
     {
         return $this->belongsToMany(Persona::class, 'user_persona')
-                    ->withPivot('xp', 'created_at', 'updated_at')
+                    ->withPivot('xp', 'date', 'is_unlocked')
                     ->withTimestamps();
+    }
+
+    public function selectedPersona()
+    {
+        return $this->belongsToMany(Persona::class, 'user_persona')
+                    ->wherePivot('date', today())
+                    ->withPivot('xp', 'is_unlocked')
+                    ->withTimestamps()
+                    ->first();
     }
 
 }

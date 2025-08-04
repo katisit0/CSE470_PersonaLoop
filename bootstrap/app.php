@@ -11,7 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+
+        //check on every request if the user has selected a persona today
+        $middleware->alias(['check.persona' => \App\Http\Middleware\EnsurePersonaSelected::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

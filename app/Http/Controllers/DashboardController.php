@@ -12,13 +12,10 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $today = Carbon::today()->toDateString();
 
- 
-        $selectedPersona = $user->personas()
-            ->whereDate('user_persona.created_at', $today)
-            ->first();
+        // Get the persona selected *today*
+        $persona = $user->personas()->wherePivot('date', today())->first();
 
-        return view('dashboard', compact('selectedPersona'));
+        return view('dashboard', compact('persona'));
     }
 }
