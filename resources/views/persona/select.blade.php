@@ -1,50 +1,44 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gray-900 text-white py-12 px-6">
-    <h1 class="text-3xl font-bold mb-8 text-center">Choose Your Persona!</h1>
+<div class="min-h-screen text-white py-12 px-6">
+
+    <div class="flex justify-center mb-8">
+        <div class="relative bg-[#FF0000] p-6 rounded-2xl shadow-lg border border-teal-300">
+            <h1 class="text-4xl font-extrabold text-white text-center tracking-wide drop-shadow-md">
+                Choose Your Persona!
+            </h1>
+        </div>
+    </div>
+
 
     {{-- Message Container --}}
     <div id="message" class="max-w-2xl mx-auto mb-6 text-center font-semibold text-lg"></div>
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-wrap">
-            @foreach ($personas as $persona)
-                <div class="basis-1/3 max-w-1/3 p-4">
-                    <button 
-                        class="w-full persona-btn bg-[#470000] hover:bg-[#FF0000] rounded-lg shadow-xl p-4 text-left transition duration-300 
-                        border-2 transform hover:-translate-y-1 ring-2 ring-offset-2 ring-offset-[#470000] ring-[#470000]"
-                        data-persona-id="{{ $persona->id }}"
-                        data-persona-name="{{ $persona->name }}" {{-- modify with other persona attributes if needed --}}
-                        
-                    >
-                        <div class="h-40 w-full bg-gray rounded mb-4 flex items-center justify-center">
-                            <span class="text-gray-400">
-                                <img src="{{ asset($persona->image) }}" 
-                                    alt="{{ $persona->name }}" 
-                                    style="width: 120px; height: 120px; object-fit: contain; border-radius: 0.25rem;"
-                                    class="rounded"
-                                >
-                            </span>
-                        </div>
-            
-                        <h2 class="text-xl font-semibold mb-2 text-white">{{ $persona->name }}</h2>
-                        <p class="text-sm text-white-300">{{ $persona->description }}</p>
-                    </button>
-                </div>
-            @endforeach
-        </div>
+    {{-- Persona Cards in a responsive row of 3 --}}
+    <div class="flex flex-wrap justify-center gap-6">
+        @foreach ($personas as $persona)
+            <div class="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3">
+                <x-persona-card 
+                    :name="$persona->name"
+                    :description="$persona->description"
+                    :image="$persona->image"
+                    :xp="null"
+                    :id="$persona->id"
+                    :showActions="true"
+                />
+            </div>
+        @endforeach
     </div>
+
 </div>
 
 {{-- jQuery AJAX --}}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $('.persona-btn').click(function (e) {
+    $(document).on('click', '.persona-btn', function (e) {
         e.preventDefault();
 
-
-        // modify with other persona attributes if needed
         const personaId = $(this).data('persona-id');
         const personaName = $(this).data('persona-name');
 
@@ -58,17 +52,14 @@
                 persona_id: personaId
             },
             success: function (response) {
-                if (response.success) {
-                    $('#message').text(response.message).css('color', 'lime');
-                } else {
-                    $('#message').text(response.message).css('color', 'orange');
-                }
+                $('#message')
+                    .text(response.message)
+                    .css('color', response.success ? 'lime' : 'orange');
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 const msg = xhr.responseJSON?.message || 'An error occurred. Please try again.';
                 $('#message').text(msg).css('color', 'red');
             }
-
         });
     });
 </script>
