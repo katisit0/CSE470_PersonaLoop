@@ -13,7 +13,7 @@
             />
         @else
             <div class="text-center text-white bg-red-600 px-6 py-4 rounded shadow-lg">
-                <h2 class="text-2xl font-semibold">No Persona Selected</h2>
+                <h2 class="text-2xl font-semibold">No Persona Selected today</h2>
                 <p class="mt-2">Please <a href="{{ route('persona.select') }}" class="underline font-medium">choose a persona</a> to begin your journey.</p>
             </div>
         @endif
