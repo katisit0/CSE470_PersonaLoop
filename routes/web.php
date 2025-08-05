@@ -30,9 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/select-persona', [PersonaSelectionController::class, 'store'])->name('persona.select');
 
     Route::get('/journal', [JournalController::class, 'create'])->name('journal.create');
-    Route::get('/journal/{date}', [JournalController::class, 'show'])
-        ->where('date', '\d{4}-\d{2}-\d{2}') // date format YYYY-MM-DD validation
-        ->name('journal.show');
     Route::post('/journal', [JournalController::class, 'store'])->name('journal.store');
 
 
