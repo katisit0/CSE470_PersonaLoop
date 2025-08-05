@@ -8,9 +8,16 @@ use Illuminate\Support\Facades\Auth;
 
 class JournalController extends Controller
 {
-     public function create()
+    public function create()
     {
-        return view('journal.create');
+        $user = Auth::user();
+
+        // Fetch all journals by this user, ordered descending by date
+        $pastJournals = Journal::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('journal.create', compact('pastJournals'));
     }
 
     public function store(Request $request)
