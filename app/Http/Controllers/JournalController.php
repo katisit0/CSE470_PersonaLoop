@@ -13,61 +13,73 @@ class JournalController extends Controller
     {
         $user = Auth::user();
 
+        // Get the selected month or default to today
         $monthParam = $request->query('month');
         $currentMonth = $monthParam ? Carbon::parse($monthParam . '-01') : Carbon::today();
 
         $startOfMonth = $currentMonth->copy()->startOfMonth();
         $endOfMonth = $currentMonth->copy()->endOfMonth();
 
+        // Dates with journals this month for this user
         $journalDates = Journal::where('user_id', $user->id)
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->pluck(\DB::raw('DATE(created_at)'))
             ->map(fn($date) => Carbon::parse($date)->format('Y-m-d'))
             ->toArray();
 
-        // Determine selected date: prefer 'date' query param, else today
-        $selectedDate = $request->query('date') ? Carbon::parse($request->query('date')) : Carbon::today();
+        // Determine which date's journal to show (default today)
+        $selectedDateStr = $request->query('date') ?? Carbon::today()->format('Y-m-d');
+        $selectedDate = Carbon::parse($selectedDateStr);
 
-        // Get journal for selected date if exists
-        $selectedJournal = Journal::where('user_id', $user->id)
+        // Get journal entry for selected date (if any)
+        $journal = Journal::where('user_id', $user->id)
             ->whereDate('created_at', $selectedDate)
             ->first();
 
-        // If AJAX, return same view (journal.create) but only the calendar container HTML to replace
+        // Check if journal can be edited/added: only if selected date is today
+        $canEdit = $selectedDate->isSameDay(Carbon::today());
+
+        // If AJAX request, return full rendered HTML (no partials)
         if ($request->ajax()) {
-            // Return only the part inside #journal-calendar-container (blade will need to support this)
-            // We can detect ajax in blade and render only container or full page
-            return view('journal.create', compact('currentMonth', 'journalDates', 'selectedDate', 'selectedJournal'));
+            return view('journal.create', compact(
+                'currentMonth', 'journalDates', 'selectedDate', 'journal', 'canEdit'
+            ))->render();
         }
 
-        // For normal request return full page
-        return view('journal.create', compact('currentMonth', 'journalDates', 'selectedDate', 'selectedJournal'));
+        // Normal full page load
+        return view('journal.create', compact(
+            'currentMonth', 'journalDates', 'selectedDate', 'journal', 'canEdit'
+        ));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'content' => 'required|string|max:10000',
+            'date' => 'required|date',
         ]);
 
         $user = Auth::user();
 
-        $today = Carbon::today();
+        $journalDate = Carbon::parse($request->input('date'));
 
-        // Force journalDate to today only, ignore any date from input
-        $journalDate = $today;
+        // Only allow adding journal for today
+        if (!$journalDate->isSameDay(Carbon::today())) {
+            return redirect()->back()->with('error', 'You can only add or edit journal for today.');
+        }
 
-        // Check if journal already exists for today
-        $alreadySubmitted = Journal::where('user_id', $user->id)
+        // Check if journal already exists for today (only one journal per day)
+        $existing = Journal::where('user_id', $user->id)
             ->whereDate('created_at', $journalDate)
-            ->exists();
+            ->first();
 
-        if ($alreadySubmitted) {
+        if ($existing) {
+            // Optionally, you could allow editing here, but you said only add once per day
             return redirect()->back()->with('error', 'You have already submitted a journal for today.');
         }
 
-        // Save new journal
-        $xp = 10;
+        // Create new journal entry for today
+        $xp = 10; // example XP value
         Journal::create([
             'user_id' => $user->id,
             'content' => $request->content,
@@ -76,11 +88,11 @@ class JournalController extends Controller
             'updated_at' => $journalDate,
         ]);
 
+        // Award XP
         $user->xp += $xp;
         $user->save();
 
         return redirect()->route('journal.create', ['month' => $journalDate->format('Y-m'), 'date' => $journalDate->format('Y-m-d')])
-                        ->with('success', 'Journal submitted and XP awarded!');
+            ->with('success', 'Journal submitted and XP awarded!');
     }
-
 }

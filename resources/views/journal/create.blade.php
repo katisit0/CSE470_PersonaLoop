@@ -1,36 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
+
 @php
     use Carbon\Carbon;
 
     $today = Carbon::today();
+    $currentMonth = $currentMonth ?? (request('month') ? Carbon::parse(request('month') . '-01') : $today);
 
-    $selectedDate = $selectedDate ?? $today;
-    $selectedJournal = $selectedJournal ?? null;
-
-    $isToday = $selectedDate->isSameDay($today);
-
-    // Month currently displayed (already passed from controller)
-    // but if you want to be safe:
-    $currentMonth = $currentMonth ?? $today->copy()->startOfMonth();
-
-    // Calculate calendar grid start and end days for full weeks
     $startOfMonth = $currentMonth->copy()->startOfMonth();
     $endOfMonth = $currentMonth->copy()->endOfMonth();
-
     $startDay = $startOfMonth->copy()->startOfWeek();
     $endDay = $endOfMonth->copy()->endOfWeek();
 
+    $selectedDate = $selectedDate ?? (request('date') ? Carbon::parse(request('date')) : $today);
+
     $prevMonth = $currentMonth->copy()->subMonth()->format('Y-m');
     $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
-
-    $hasJournalForSelectedDate = $selectedJournal !== null;
 @endphp
 
+{{-- NAVIGATION BAR OUTSIDE AJAX REPLACED CONTENT --}}
+<div class="max-w-5xl mx-auto mt-6 px-4">
+    {{-- Your main navbar here --}}
+    {{-- For example --}}
+    <nav class="bg-gray-900 text-white p-4 rounded mb-6">
+        <h1 class="text-3xl font-bold">My Journal App</h1>
+    </nav>
+</div>
 
+{{-- THIS DIV WILL BE REPLACED VIA AJAX --}}
 <div class="max-w-3xl mx-auto mt-10 px-4 text-white" id="journal-calendar-container">
 
+@section('calendarContent')
     {{-- Navigation --}}
     <div class="flex items-center justify-between mb-6">
         <button id="prev-month" class="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 transition">&laquo; Prev</button>
@@ -61,25 +62,25 @@
                     $isCurrentMonth = $date->month === $currentMonth->month;
                     $dateStr = $date->format('Y-m-d');
                     $hasJournal = in_array($dateStr, $journalDates ?? []);
-                    $isTodayDate = $date->isSameDay($today);
-                    $isSelectedDate = $date->isSameDay($selectedDate);
+                    $isToday = $date->isSameDay($today);
+                    $isSelected = $date->isSameDay($selectedDate);
                 @endphp
 
-                <td class="border border-gray-700 text-center p-3 relative cursor-pointer
+                <td class="border border-gray-700 text-center p-3 relative
                     {{ $isCurrentMonth ? 'text-white bg-gray-900' : 'text-gray-500 bg-gray-700' }}
-                    {{ $isSelectedDate ? 'ring-4 ring-blue-400' : '' }}"
-                    data-date="{{ $dateStr }}">
-                    
-                    <span class="block w-full h-full relative z-10">
+                    {{ $isSelected ? 'ring-2 ring-blue-400 rounded' : '' }}"
+                    data-date="{{ $dateStr }}"
+                >
+                    <span class="cursor-pointer block w-full h-full relative z-10 date-cell">
                         {{ $date->day }}
                     </span>
 
-                    {{-- Circles for journal entry and today --}}
+                    {{-- Circles --}}
                     @if ($hasJournal)
                         <span class="absolute top-1 right-1 w-4 h-4 rounded-full border-2 border-red-500"></span>
                     @endif
 
-                    @if ($isTodayDate)
+                    @if ($isToday)
                         <span class="absolute bottom-1 left-1 w-4 h-4 rounded-full border-2 border-green-500"></span>
                     @endif
                 </td>
@@ -91,14 +92,8 @@
         </tbody>
     </table>
 
-    {{-- Journal Section --}}
-    <h1 class="text-3xl font-bold mb-4">
-        @if ($isToday)
-            Write Your Journal for Today
-        @else
-            Journal for {{ $selectedDate->format('F j, Y') }}
-        @endif
-    </h1>
+    {{-- Journal Form --}}
+    <h1 class="text-3xl font-bold mb-4">Journal for {{ $selectedDate->format('F j, Y') }}</h1>
 
     @if(session('success'))
         <div class="mb-4 p-4 bg-green-700 rounded shadow">{{ session('success') }}</div>
@@ -108,86 +103,139 @@
         <div class="mb-4 p-4 bg-red-700 rounded shadow">{{ session('error') }}</div>
     @endif
 
-    @if($isToday && !$hasJournalForSelectedDate)
-        {{-- Show form only if today and no journal exists --}}
-        <form method="POST" action="{{ route('journal.store') }}" id="journal-form">
-            @csrf
-            {{-- No hidden date input: always today --}}
-            <x-journal.textarea
-                id="journal"
-                name="content"
-                rows="10"
-                placeholder="Write about your day, your thoughts, or anything you like..."
-                class="bg-[#222] text-white border border-gray-600 rounded-lg resize-none"
-                required
-            >{{ old('content') }}</x-journal.textarea>
+    {{-- Only allow adding journal if date is today and journal doesn't exist --}}
+    @php
+        $canAddJournal = $selectedDate->isSameDay($today) && !$journal;
+    @endphp
 
-            @error('content')
-                <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
-            @enderror
+    @if($canAddJournal)
+    <form method="POST" action="{{ route('journal.store') }}" id="journal-form">
+        @csrf
 
-            <button type="submit" class="mt-4 inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-200">
-                Publish Journal
-            </button>
-        </form>
+        <input type="hidden" name="date" value="{{ $selectedDate->format('Y-m-d') }}">
+
+        <textarea
+            id="journal-content"
+            name="content"
+            rows="10"
+            placeholder="Write about your day, your thoughts, or anything you like..."
+            class="bg-[#222] text-white border border-gray-600 rounded-lg resize-none w-full p-3"
+            required
+        >{{ old('content') }}</textarea>
+
+        @error('content')
+            <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
+        @enderror
+
+        <button type="submit" class="mt-4 inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-200">
+            Publish Journal
+        </button>
+    </form>
+    @elseif($journal)
+        <div class="p-4 bg-gray-900 rounded border border-gray-700 whitespace-pre-wrap">{{ $journal->content }}</div>
     @else
-        {{-- Show journal content or message --}}
-        @if($hasJournalForSelectedDate)
-            <div class="whitespace-pre-wrap bg-[#222] p-4 rounded border border-gray-600">
-                {{ $selectedJournal->content }}
-            </div>
-        @else
-            <p class="text-gray-400 italic">No journal entry for this day.</p>
-        @endif
+        <p class="italic text-gray-400">No journal entry for this date.</p>
     @endif
 </div>
+@endsection
 
-{{-- AJAX scripts for month navigation and selecting date --}}
+{{-- AJAX + JS --}}
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const container = document.getElementById('journal-calendar-container');
-    const prevBtn = document.getElementById('prev-month');
-    const nextBtn = document.getElementById('next-month');
-    const todayBtn = document.getElementById('today-btn');
 
-    function loadPage(params = {}) {
+    // Helper to fetch and load month/date
+    function loadView(params = {}) {
         const url = new URL(window.location);
-        Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+        if (params.month) url.searchParams.set('month', params.month);
+        if (params.date) url.searchParams.set('date', params.date);
+        else url.searchParams.delete('date');
+
         fetch(url.toString(), {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
         .then(res => res.text())
         .then(html => {
             container.innerHTML = html;
-            attachDateClickHandlers(); // re-attach click handlers after replacing content
+            attachListeners(); // reattach listeners on new content
         })
-        .catch(err => console.error('Failed to load:', err));
+        .catch(console.error);
     }
 
-    prevBtn.addEventListener('click', () => {
-        loadPage({month: "{{ $prevMonth }}"});
-    });
+    // Navigation buttons logic: calculate prev/next months dynamically
+    function getCurrentMonthFromHeader() {
+        const header = document.getElementById('calendar-month-year').textContent.trim();
+        return new Date(header + ' 1'); // parse e.g. "August 2025 1"
+    }
 
-    nextBtn.addEventListener('click', () => {
-        loadPage({month: "{{ $nextMonth }}"});
-    });
+    function formatYearMonth(date) {
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+    }
 
-    todayBtn.addEventListener('click', () => {
-        loadPage({month: "{{ $today->format('Y-m') }}", date: "{{ $today->format('Y-m-d') }}"});
-    });
+    function prevMonth() {
+        const current = getCurrentMonthFromHeader();
+        current.setMonth(current.getMonth() - 1);
+        loadView({month: formatYearMonth(current)});
+    }
 
-    function attachDateClickHandlers() {
-        document.querySelectorAll('#calendar-table td[data-date]').forEach(td => {
-            td.addEventListener('click', () => {
-                const date = td.getAttribute('data-date');
-                loadPage({month: date.substring(0,7), date: date});
-            });
+    function nextMonth() {
+        const current = getCurrentMonthFromHeader();
+        current.setMonth(current.getMonth() + 1);
+        loadView({month: formatYearMonth(current)});
+    }
+
+    function today() {
+        const today = new Date();
+        loadView({month: formatYearMonth(today), date: today.toISOString().slice(0,10)});
+    }
+
+    // Attach event listeners to buttons and date cells
+    function attachListeners() {
+        document.getElementById('prev-month').onclick = prevMonth;
+        document.getElementById('next-month').onclick = nextMonth;
+        document.getElementById('today-btn').onclick = today;
+
+        // Clicking a date cell loads that day's journal but only for current month
+        document.querySelectorAll('.date-cell').forEach(cell => {
+            cell.onclick = () => {
+                const date = cell.parentElement.getAttribute('data-date');
+                const currentMonthText = document.getElementById('calendar-month-year').textContent.trim();
+                const currentMonth = new Date(currentMonthText + ' 1');
+
+                if (date.startsWith(currentMonth.getFullYear() + '-' + String(currentMonth.getMonth() + 1).padStart(2, '0'))) {
+                    loadView({month: formatYearMonth(currentMonth), date: date});
+                }
+            };
         });
+
+        // Intercept form submission to use AJAX
+        const form = document.getElementById('journal-form');
+        if (form) {
+            form.onsubmit = e => {
+                e.preventDefault();
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': formData.get('_token') },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.success);
+                        today(); // reload today's journal/month to update UI
+                    } else if (data.error) {
+                        alert(data.error);
+                    }
+                })
+                .catch(() => alert('Failed to submit journal.'));
+            };
+        }
     }
 
-    attachDateClickHandlers();
+    attachListeners();
 });
 </script>
-
-
 @endsection
