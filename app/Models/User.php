@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'xp',
     ];
 
     /**
@@ -61,5 +62,13 @@ class User extends Authenticatable
                     ->withTimestamps()
                     ->first();
     }
+
+
+    public function journals()
+    {
+        return $this->hasMany(Journal::class);
+    }
+
+
 
 }

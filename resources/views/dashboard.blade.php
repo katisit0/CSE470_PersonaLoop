@@ -1,25 +1,41 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-4xl mx-auto mt-8 p-6 bg-[#470000] rounded-lg shadow-xl p-4 text-left transition duration-300 border-2 transform hover:-translate-y-1 ring-2 ring-offset-2 ring-offset-[#470000] ring-[#470000]">
-    @if ($persona)
-        <div class="text-center pt-6">
-            <h1 class="text-3xl font-bold text-white">{{ $persona->name }}</h1>
-            <img src="{{ asset($persona->image) }}" 
-                alt="{{ $persona->name }}" 
-                style="width: 120px; height: 120px; object-fit: contain; border-radius: 0.25rem;"
-                class="rounded mx-auto block"
+<div class="container mx-auto px-4 mt-16">
+    <div class="flex justify-center">
+        @if ($persona)
+            <x-persona-card 
+                :name="$persona->name ?? ''"
+                :description="$persona->description ?? ''"
+                :image="$persona->image ?? ''"
+                :xp="$persona->pivot->xp ?? 0"
+                :showActions="false"
+            />
+        @else
+            <div class="text-center text-white bg-red-600 px-6 py-4 rounded shadow-lg">
+                <h2 class="text-2xl font-semibold">No Persona Selected today</h2>
+                <p class="mt-2">Please <a href="{{ route('persona.select') }}" class="underline font-medium">choose a persona</a> to begin your journey.</p>
+            </div>
+        @endif
+    </div>
+
+    <div class="flex justify-center mt-10">
+        <div class="w-96">
+            <x-card 
+                title="Write your Journal now!"
+                description="View or write your past journal entries."
+                image="{{ asset('images/journal.png') }}"
             >
-            <p class="text-xl font-semibold mb-2 text-white">{{ $persona->description }}</p>
-            <p class="text-xl font-semibold mb-2 text-white">XP: {{ $persona->pivot->xp }}</p>
+                <a href="{{ route('journal.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-[#004747] rounded-lg">
+                    Go to Journal
+                </a>
+            </x-card>
+
+
         </div>
-    @else
-        <p class="text-center text-gray-500">You haven't selected a persona for today yet.</p>
-    @endif
-</div>
-<div class="max-w-4xl mx-auto text-center mt-4 bg-[#470000] rounded-lg shadow-xl p-4 text-left transition duration-300 border-2 transform hover:-translate-y-1 ring-2 ring-offset-2 ring-offset-[#470000] ring-[#470000]">
-    <a href="{{ url('/select-persona') }}" class="text-white hover:text-[#3E4305] text-lg">
-        Haven't selected a persona today? Select now
-    </a>
+    </div>
+
+
+
 </div>
 @endsection
