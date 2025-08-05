@@ -18,5 +18,24 @@
             </div>
         @endif
     </div>
+
+    <div class="flex justify-center mt-10">
+        <div class="w-96">
+            <x-card 
+                title="Write your Journal now!"
+                description="View or write your past journal entries."
+                image="{{ asset('images/journal.png') }}"
+            >
+                <a href="{{ route('journal.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-[#004747] rounded-lg">
+                    Go to Journal
+                </a>
+            </x-card>
+
+
+        </div>
+    </div>
+
+
+
 </div>
 @endsection
