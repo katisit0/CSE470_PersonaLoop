@@ -67,9 +67,43 @@ class PersonaSelectionController extends Controller
             ]);
         }
 
+        // -----------------------------
+        // STREAK CALCULATION LOGIC
+        // -----------------------------
+        
+        $userPersonas = $user->personas()->orderByPivot('date', 'desc')->get();
+
+        $streak = 0;
+        if ($userPersonas->isNotEmpty()) {
+            $streak = 1;
+            $lastDate = Carbon::parse($userPersonas->first()->pivot->date)->startOfDay();
+
+            for ($i = 1; $i < $userPersonas->count(); $i++) {
+                $currentDate = Carbon::parse($userPersonas[$i]->pivot->date)->startOfDay();
+                $expectedDate = $lastDate->copy()->subDay();
+
+                if ($currentDate->equalTo($expectedDate)) {
+                    $streak++;
+                    $lastDate = $currentDate;
+                } else {
+                    break;
+                }
+            }
+
+            // If last selection was not yesterday or today, reset streak to 1 (today counts)
+            if ($lastDate->lt($today->subDay())) {
+                $streak = 1;
+            }
+        }
+
+        // Save streak in user table
+        $user->streak_days = $streak;
+        $user->save();
+
         return response()->json([
             'success' => true,
             'message' => 'Persona selected successfully!',
+            'streak_days' => $user->streak_days,
         ]);
 
 

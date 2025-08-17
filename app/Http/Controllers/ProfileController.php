@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Journal;
+use Carbon\Carbon; 
 
 class ProfileController extends Controller
 {

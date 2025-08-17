@@ -29,16 +29,18 @@
         </div>
     </div>
 
-    
+    <!-- Display the user's streak -->
+    <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+        <div class="max-w-xl">
+            <h3 class="text-lg font-semibold mb-4">Your Streak</h3>
+            <p class="text-xl font-bold">
+                Streak: {{ $user->streak_days ?? 0 }} days
+            </p>
+        </div>
+    </div>
 
-        
-    
-    
 
-
-    
-
-    {{-- 4. Personas --}}
+    {{-- Personas --}}
     <div class="bg-white shadow sm:rounded-lg p-6">
         <h2 class="text-xl font-bold mb-4">Personas</h2>
         @if($user->is_profile_public || auth()->id() === $user->id)
@@ -56,7 +58,7 @@
         @endif
     </div>
 
-    {{-- 5. Achievements --}}
+    {{-- Achievements --}}
     <div class="bg-white shadow sm:rounded-lg p-6">
         <h2 class="text-xl font-bold mb-4">Achievements</h2>
         @if($user->achievements->count() > 0)
@@ -75,19 +77,15 @@
         @endif
     </div>
 
-    {{-- 6. Streak --}}
-    <div class="bg-white shadow sm:rounded-lg p-6">
-        <h2 class="text-xl font-bold mb-4">Current Streak</h2>
-        <p>{{ $user->streak_days ?? 0 }} days</p>
-    </div>
+    
 
-    {{-- 7. Quests Placeholder --}}
+    {{-- Quests Placeholder --}}
     <div class="bg-white shadow sm:rounded-lg p-6">
         <h2 class="text-xl font-bold mb-4">Quests</h2>
         <p>Feature coming soon...</p>
     </div>
 
-    {{-- 8. Journals Placeholder --}}
+    {{-- Journals Placeholder --}}
     <div class="bg-white shadow sm:rounded-lg p-6">
         @if($pastJournals->isEmpty())
         <p class="text-gray-400">You have no past journals.</p>
