@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'xp',
+        'is_profile_public',
+        'streak_days',
     ];
 
     /**
@@ -43,32 +45,46 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            
+            'is_profile_public' => 'boolean',
         ];
     }
 
     public function personas()
     {
         return $this->belongsToMany(Persona::class, 'user_persona')
-                    ->withPivot('xp', 'date', 'is_unlocked')
+                    ->withPivot('xp', 'level', 'date', 'is_unlocked')
                     ->withTimestamps();
     }
+
+    /**public function userPersonas()
+    {
+        return $this->hasMany(UserPersona::class);
+    }
+    }*/
 
     public function selectedPersona()
     {
         return $this->belongsToMany(Persona::class, 'user_persona')
                     ->wherePivot('date', today())
-                    ->withPivot('xp', 'is_unlocked')
+                    ->withPivot('xp', 'level', 'is_unlocked')
                     ->withTimestamps()
                     ->first();
     }
 
+    
 
     public function journals()
     {
         return $this->hasMany(Journal::class);
     }
 
+    public function achievements()
+    {
+        return $this->belongsToMany(Achievement::class, 'user_achievements')
+                    ->withTimestamps()
+                    ->withPivot('unlocked_at');
+    }
 
 
 }

@@ -19,9 +19,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.edit');
+    Route::post('/profile/update-info', [ProfileController::class, 'updateInfo'])->name('profile.updateInfo');
+    Route::delete('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
 
     Route::post('/select-persona', [PersonaSelectionController::class, 'store'])->name('persona.select.store');
     //Route::post('/persona/select/{id}', [PersonaSelectionController::class, 'store'])->name('persona.select');
