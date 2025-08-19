@@ -20,7 +20,7 @@ class PersonaCard extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct($name, $description, $image, $xp, $showActions = true)
+    public function __construct($name, $description, $image, $xp = null, $showActions = true)
     {
         $this->name = $name;
         $this->description = $description;

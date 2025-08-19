@@ -40,7 +40,15 @@
     </div>
 
 
-    {{-- Personas --}}
+    <!-- Display User XP -->
+    <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+        <div class="max-w-xl">
+            <h3 class="text-lg font-semibold mb-2">Your XP</h3>
+            <p class="text-xl font-bold">{{ $userXp }} XP</p>
+        </div>
+    </div>
+
+    <!-- Personas -->
     <div class="bg-white shadow sm:rounded-lg p-6">
         <h2 class="text-xl font-bold mb-4">Personas</h2>
         @if($user->is_profile_public || auth()->id() === $user->id)
@@ -48,8 +56,8 @@
                 @foreach($user->personas as $persona)
                     <div class="border rounded p-3">
                         <h3 class="font-bold">{{ $persona->name }}</h3>
-                        <p>Level: {{ $persona->pivot->level }}</p>
-                        <p>XP: {{ $persona->pivot->xp }}</p>
+                        <!-- ✅ Only show persona level -->
+                        <p>Level: {{ $persona->level ?? 1 }}</p>
                     </div>
                 @endforeach
             </div>
@@ -57,6 +65,8 @@
             <p>Profile is private. Persona details are hidden.</p>
         @endif
     </div>
+
+
 
     {{-- Achievements --}}
     <div class="bg-white shadow sm:rounded-lg p-6">

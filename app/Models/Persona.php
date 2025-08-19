@@ -12,7 +12,13 @@ class Persona extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_persona')
-            ->withPivot('xp', 'level', 'date', 'is_unlocked')
+            ->withPivot('xp', 'level', 'is_unlocked', 'last_selected_at')
             ->withTimestamps();
+    }
+
+
+    public function selections()
+    {
+        return $this->hasMany(PersonaSelection::class);
     }
 }

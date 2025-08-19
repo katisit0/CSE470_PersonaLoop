@@ -4,18 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserPersona extends Model
+class PersonaSelection extends Model
 {
-    protected $table = 'user_persona';
-    
     protected $fillable = [
         'user_id',
         'persona_id',
-        'xp',
-        'level',
-        'date',
-        'is_unlocked',
-        'last_selected_at',
+        'selected_at',
+        'xp_earned',
     ];
 
     public function user()
@@ -28,4 +23,3 @@ class UserPersona extends Model
         return $this->belongsTo(Persona::class);
     }
 }
-    

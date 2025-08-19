@@ -24,7 +24,8 @@ class ProfileController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('profile.index', compact('user', 'pastJournals'));
+        $userXp = $user->xp ?? 0;
+        return view('profile.index', compact('user', 'pastJournals','userXp'));
     }
 
     // Update basic profile info (name, email, public/private toggle)

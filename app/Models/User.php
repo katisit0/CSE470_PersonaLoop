@@ -50,26 +50,40 @@ class User extends Authenticatable
         ];
     }
 
+
+    //Long term relationships with users and personas
     public function personas()
     {
         return $this->belongsToMany(Persona::class, 'user_persona')
-                    ->withPivot('xp', 'level', 'date', 'is_unlocked')
+                    ->withPivot('xp', 'level', 'date', 'is_unlocked', 'last_selected_at')
                     ->withTimestamps();
     }
 
-    /**public function userPersonas()
-    {
-        return $this->hasMany(UserPersona::class);
-    }
-    }*/
 
+    //History of persona selections by the user
+    public function personaSelections()
+    {
+        return $this->hasMany(PersonaSelection::class);
+    }
+
+
+    //Todays selected persona
     public function selectedPersona()
     {
-        return $this->belongsToMany(Persona::class, 'user_persona')
-                    ->wherePivot('date', today())
-                    ->withPivot('xp', 'level', 'is_unlocked')
-                    ->withTimestamps()
-                    ->first();
+        // Get today’s selection from persona_selections
+        $selection = $this->personaSelections()
+                        ->whereDate('selected_at', today())
+                        ->with('persona')
+                        ->latest('selected_at')
+                        ->first();
+
+        
+        return $selection ? $selection->persona : null;
+    }
+
+    public function userPersonas()
+    {
+        return $this->hasMany(UserPersona::class);
     }
 
     

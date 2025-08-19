@@ -38,7 +38,7 @@ class JournalController extends Controller
         }
 
         // Save journal and award XP
-        $xp = 10; // or any other logic
+        $xp = 15; 
         Journal::create([
             'user_id' => $user->id,
             'content' => $request->content,
@@ -46,8 +46,7 @@ class JournalController extends Controller
         ]);
 
         // Award XP to user
-        $user->xp += $xp;
-        $user->save();
+        $user->increment('xp', $xp);
 
         return redirect()->route('journal.create')->with('success', 'Journal submitted and XP awarded!');
     }

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Persona;
+use App\Models\UserPersona;
+
 
 class DashboardController extends Controller
 {
@@ -14,8 +16,10 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Get the persona selected *today*
-        $persona = $user->personas()->wherePivot('date', today())->first();
+        $persona = $user->selectedPersona();
 
-        return view('dashboard', compact('persona'));
+        $userXp = $user->xp ?? 0;
+        return view('dashboard', compact('persona','userXp'));
+        
     }
 }
