@@ -95,7 +95,7 @@
         <p>Feature coming soon...</p>
     </div>
 
-    {{-- Journals Placeholder --}}
+    {{-- Journals --}}
     <div class="bg-white shadow sm:rounded-lg p-6">
         @if($pastJournals->isEmpty())
         <p class="text-gray-400">You have no past journals.</p>
